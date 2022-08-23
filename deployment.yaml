@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: prometheus-deployment
+    labels: 
+      app: prometheus
+      tier: deploy
+spec:
+    replicas: 1
+    selector:
+      matchLabels: 
+        tier: monitoring
+    template:
+      metadata:
+        labels:
+          tier: monitoring
+      spec:
+        containers:
+        - name: prometheus
+          image: ishajain140/prometheus:v1
+          ports:
+          - containerPort: 9090
+          volumeMounts:
+            - name: prometheus-volume
+              mountPath: "/prometheus"
+        volumes:
+          - name: prometheus-volume
+            persistentVolumeClaim:
+              claimName: prom-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: grafana
+    labels: 
+      app: grafana
+      tier: deploy
+spec:
+    replicas: 1
+    selector:
+      matchLabels: 
+        tier: monitoring
+    template:
+      metadata:
+        labels:
+          tier: monitoring
+      spec:
+        containers:
+        - name: grafana-container
+          image: ishajain140/grafana:v1
+          ports:
+          - containerPort: 3000
+          volumeMounts:
+            - name: grafana-volume
+              mountPath: /var/lib/grafana
+        volumes:
+          - name: grafana-volume
+            persistentVolumeClaim:
+              claimName: grafana-pvc
